@@ -1,0 +1,11 @@
+# Common ignores
+node_modules/
+.env
+logs/
+
+# Frontend specific ignores
+client/dist/
+client/build/
+
+# Backend specific ignores
+server/logs/

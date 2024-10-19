@@ -1,0 +1,7 @@
+import { React  } from 'react';
+
+function VolunteerHome() {
+    return (
+        <!DOCTYPE html><html> <head> <title>Profile </title><link rel="stylesheet" href="../stylesheets/profile-db.css"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"></head><body style="height: 100vh;"><div class="container-fluid d-flex flex-column h-100"><nav class="row bg-dark text-light py-4 px-3"><div class="navbar"> <div> <a class="btn btn-primary" href="/logout">Sign out</a></div><a href="/profile/"> <img src="../images/house-fill.svg" alt="home icon"></a></div></nav><div class="row flex-grow-1"><div class="col col-md-10 ps-5 pt-5"><div class="container-md h-100"> <div class="row"> <a class="col-6 p-2 option-box"> <img src="../images/person-fill.svg" alt="option icon"/><p class="mt-2">User Settings</p></a><a class="col-6 p-2 option-box"> <img src="../images/calendar-event.svg" alt="option icon"/><p class="mt-2">Manage events</p></a></div></div><li class="col-3 padding filter-item selected">Popular</li><li class="col-3 padding filter-item">Nearby</li></div></div></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"> </script></body></html>
+    );
+}

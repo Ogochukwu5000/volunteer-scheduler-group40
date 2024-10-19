@@ -22,10 +22,12 @@ notifRoute.post('/', function(req, res) {
         };
 
     transporter.sendMail(mailData, function (err, info) {
-        if(err)
-            console.error(err)
+        if(err) { 
+            console.error(err);
+            res.send(422);
+        }
         else
-            console.log(info);
+            res.send(201);
         });
 });
 

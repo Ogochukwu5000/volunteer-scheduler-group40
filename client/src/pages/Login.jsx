@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import {toast} from "react-hot-toast"
 
 export default function Login() {
     
@@ -10,11 +11,11 @@ export default function Login() {
         password: ""
     })
 
+    const navigate = useNavigate();
 
 const loginUser = async (e) =>{
     e.preventDefault()
-    //frst deconstruct your data
-    const navigate = useNavigate();
+    //first deconstruct your data
     const {username, password} = data
         try {
             const {data} = await axios.post("/login", {
@@ -30,6 +31,7 @@ const loginUser = async (e) =>{
             }
         } catch (error) {
             console.log(error)
+            toast.error("An error occurred. Please try again.");
         }
 
 }

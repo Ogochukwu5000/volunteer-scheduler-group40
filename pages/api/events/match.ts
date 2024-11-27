@@ -16,11 +16,15 @@ export default async function handler(
 
     // Get event and volunteer details
     const event = await db.collection("events").findOne({ _id: new ObjectId(eventId) });
-    const volunteer = await db.collection("users").findOne({ _id: new ObjectId(volunteerId) });
+    const volunteerData = await db.collection("users").findOne({ _id: new ObjectId(volunteerId) });
 
-    if (!event || !volunteer) {
+    if (!event || !volunteerData) {
       return res.status(404).json({ message: "Event or volunteer not found" });
     }
+
+    // Extract the full name from the volunteer data
+    const { profile: { fullName } } = volunteerData;
+    
 
     // Update event with new volunteer
     await db.collection("events").updateOne(

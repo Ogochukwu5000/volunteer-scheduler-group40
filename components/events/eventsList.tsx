@@ -77,8 +77,8 @@ const EventsList = () => {
                       {event.volunteers && event.volunteers.length > 0 ? (
                         <ul className="list-disc pl-4">
                           {event.volunteers.map((volunteerId) => (
-                            <li key={volunteerId} className="text-sm text-gray-800">
-                              Volunteer ID: {volunteerId}
+                            <li key={volunteerId.fullName} className="text-sm text-gray-800">
+                              Volunteer ID: {volunteerId.fullName}
                               {/* Replace this with volunteer names if you have their data */}
                             </li>
                           ))}

@@ -36,8 +36,8 @@ const EventForm = () => {
       }
 
       // Reset form or redirect
-      router.push('/events');
       alert('Event created successfully');
+      router.push('/events');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create event');
     } finally {

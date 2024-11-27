@@ -53,7 +53,8 @@ export default async function handler(
         if (
           !eventData.name ||
           !eventData.description ||
-          !eventData.location ||
+          !eventData.city ||
+          !eventData.state ||
           !eventData.requiredSkills ||
           !eventData.urgency ||
           !eventData.eventDate

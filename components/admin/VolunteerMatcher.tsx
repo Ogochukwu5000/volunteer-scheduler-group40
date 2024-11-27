@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { IUser } from '@/lib/models/users.model';
+import { IUserProfile } from '@/lib/models/userProfile.model';
 import { IEvent } from '@/lib/models/event.model';
 
 const VolunteerMatcher = () => {
-  const [volunteers, setVolunteers] = useState<IUser[]>([]);
+  const [volunteers, setVolunteers] = useState<{ user: IUser; profile: IUserProfile }[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,14 +19,38 @@ const VolunteerMatcher = () => {
           fetch('/api/users?role=volunteer'),
           fetch('/api/events'),
         ]);
-
+    
+        if (!volunteersRes.ok) {
+          throw new Error('Failed to fetch volunteers');
+        }
+    
+        if (!eventsRes.ok) {
+          throw new Error('Failed to fetch events');
+        }
+    
         const volunteersData = await volunteersRes.json();
         const eventsData = await eventsRes.json();
-
-        setVolunteers(volunteersData.users);
+    
+        // Fetch the user profiles in a single request
+        const userIds = volunteersData.users.map((user: IUser) => user._id);
+        const profilesRes = await fetch(`/api/userProfiles?ids=${userIds.join(',')}`);
+    
+        if (!profilesRes.ok) {
+          throw new Error('Failed to fetch user profiles');
+        }
+    
+        const profiles = await profilesRes.json();
+    
+        // Combine the user and profile data
+        const volunteersWithProfiles = volunteersData.users.map((user: IUser) => ({
+          user,
+          profile: profiles.find((p: IUserProfile) => p._id === user._id),
+        }));
+    
+        setVolunteers(volunteersWithProfiles);
         setEvents(eventsData);
       } catch (err) {
-        setError('Failed to fetch data');
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
       }
     };
 
@@ -91,27 +116,27 @@ const VolunteerMatcher = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {volunteers.map((volunteer) => {
-              // Find matching events based on skills
-              const matchingEvents = events.filter((event) =>
-                event.requiredSkills.some((skill) =>
-                  volunteer.profile.skills.includes(skill),
-                ) && !event.volunteers?.includes(volunteer._id!)
-              );
+          {volunteers.map(({ user, profile }) => {
+            // Find matching events based on skills
+            const matchingEvents = events.filter((event) =>
+              event.requiredSkills.some((skill) =>
+                profile?.skills.includes(skill),
+              ) && !event.volunteers?.includes(user._id!)
+            );
 
               return (
-                <tr key={volunteer._id}>
+                <tr key={user._id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {volunteer.profile.fullName}
+                      {profile?.fullName}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {volunteer.email}
+                      {user.email}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1">
-                      {volunteer.profile.skills.map((skill) => (
+                      {profile?.skills.map((skill) => (
                         <span
                           key={skill}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -127,11 +152,11 @@ const VolunteerMatcher = () => {
                     ) : (
                       <select
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        value={selectedEvent[volunteer._id!] || ''}
+                        value={selectedEvent[user._id!] || ''}
                         onChange={(e) =>
                           setSelectedEvent((prev) => ({
                             ...prev,
-                            [volunteer._id!]: e.target.value,
+                            [user._id!]: e.target.value,
                           }))
                         }
                       >
@@ -146,7 +171,7 @@ const VolunteerMatcher = () => {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => handleMatch(volunteer._id!)}
+                      onClick={() => handleMatch(user._id!)}
                       className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                       disabled={isLoading || matchingEvents.length === 0}
                     >

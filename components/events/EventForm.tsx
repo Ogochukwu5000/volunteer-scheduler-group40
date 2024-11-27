@@ -1,17 +1,19 @@
-'use client';
-
-import { AVAILABLE_SKILLS } from '@/lib/models/users.model';
-import React, { useState } from 'react';
+// components/EventForm.tsx
+import { useState, useEffect } from 'react';
+import { AVAILABLE_SKILLS, US_STATES } from '@/lib/constants';
+import { useRouter } from 'next/router';
 
 const URGENCY_LEVELS = ['Low', 'Medium', 'High', 'Critical'] as const;
 
 const EventForm = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    location: '',
+    city: '',
+    state: '',
     requiredSkills: [] as string[],
     urgency: '' as typeof URGENCY_LEVELS[number],
     eventDate: '',
@@ -34,6 +36,7 @@ const EventForm = () => {
       }
 
       // Reset form or redirect
+      router.push('/events');
       alert('Event created successfully');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create event');
@@ -77,19 +80,43 @@ const EventForm = () => {
         />
       </div>
 
-      <div>
-        <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-          Location *
-        </label>
-        <textarea
-          id="location"
-          value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          required
-          disabled={isLoading}
-          rows={2}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+            City *
+          </label>
+          <input
+            type="text"
+            id="city"
+            maxLength={100}
+            value={formData.city}
+            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            required
+            disabled={isLoading}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+            State *
+          </label>
+          <select
+            id="state"
+            value={formData.state}
+            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            required
+            disabled={isLoading}
+          >
+            <option value="">Select a state</option>
+            {US_STATES.map((state) => (
+              <option key={state.code} value={state.code}>
+                {state.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div>
@@ -101,7 +128,7 @@ const EventForm = () => {
           multiple
           value={formData.requiredSkills}
           onChange={(e) => {
-            const selected = Array.from(e.target.selectedOptions, option => option.value);
+            const selected = Array.from(e.target.selectedOptions, (option) => option.value);
             setFormData({ ...formData, requiredSkills: selected });
           }}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"

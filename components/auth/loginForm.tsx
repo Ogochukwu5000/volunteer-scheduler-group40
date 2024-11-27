@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 const LoginForm = () => {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,6 +43,7 @@ const LoginForm = () => {
       
       // On successful login
       alert('Login successful');
+      router.push(data.redirectUrl);
       // You might want to:
       // - Set authentication tokens/cookies
       // - Update global auth state

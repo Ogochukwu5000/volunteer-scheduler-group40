@@ -5,10 +5,58 @@ import React, { useState, useEffect } from 'react';
 
 // Using the same constants from RegisterForm
 const US_STATES = [
-  { code: "AL", name: "Alabama" },
-  { code: "AK", name: "Alaska" },
-  // ... (rest of states)
-] as const;
+    { code: "AL", name: "Alabama" },
+    { code: "AK", name: "Alaska" },
+    { code: "AZ", name: "Arizona" },
+    { code: "AR", name: "Arkansas" },
+    { code: "CA", name: "California" },
+    { code: "CO", name: "Colorado" },
+    { code: "CT", name: "Connecticut" },
+    { code: "DE", name: "Delaware" },
+    { code: "FL", name: "Florida" },
+    { code: "GA", name: "Georgia" },
+    { code: "HI", name: "Hawaii" },
+    { code: "ID", name: "Idaho" },
+    { code: "IL", name: "Illinois" },
+    { code: "IN", name: "Indiana" },
+    { code: "IA", name: "Iowa" },
+    { code: "KS", name: "Kansas" },
+    { code: "KY", name: "Kentucky" },
+    { code: "LA", name: "Louisiana" },
+    { code: "ME", name: "Maine" },
+    { code: "MD", name: "Maryland" },
+    { code: "MA", name: "Massachusetts" },
+    { code: "MI", name: "Michigan" },
+    { code: "MN", name: "Minnesota" },
+    { code: "MS", name: "Mississippi" },
+    { code: "MO", name: "Missouri" },
+    { code: "MT", name: "Montana" },
+    { code: "NE", name: "Nebraska" },
+    { code: "NV", name: "Nevada" },
+    { code: "NH", name: "New Hampshire" },
+    { code: "NJ", name: "New Jersey" },
+    { code: "NM", name: "New Mexico" },
+    { code: "NY", name: "New York" },
+    { code: "NC", name: "North Carolina" },
+    { code: "ND", name: "North Dakota" },
+    { code: "OH", name: "Ohio" },
+    { code: "OK", name: "Oklahoma" },
+    { code: "OR", name: "Oregon" },
+    { code: "PA", name: "Pennsylvania" },
+    { code: "RI", name: "Rhode Island" },
+    { code: "SC", name: "South Carolina" },
+    { code: "SD", name: "South Dakota" },
+    { code: "TN", name: "Tennessee" },
+    { code: "TX", name: "Texas" },
+    { code: "UT", name: "Utah" },
+    { code: "VT", name: "Vermont" },
+    { code: "VA", name: "Virginia" },
+    { code: "WA", name: "Washington" },
+    { code: "WV", name: "West Virginia" },
+    { code: "WI", name: "Wisconsin" },
+    { code: "WY", name: "Wyoming" }
+    // Add all states...
+  ] as const;
 
 const AVAILABLE_SKILLS = [
   "JavaScript",
@@ -19,114 +67,77 @@ const AVAILABLE_SKILLS = [
   "HTML/CSS",
 ] as const;
 
-const ProfileManagement = () => {
-  const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [formData, setFormData] = useState({
-    fullName: '',
-    address1: '',
-    address2: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    skills: [] as string[],
-    preferences: '',
-    availability: [] as string[],
-  });
-
-  // Fetch user profile data on component mount
-  useEffect(() => {
-    setMounted(true);
-    fetchUserProfile();
-  }, []);
-
-  const fetchUserProfile = async () => {
-    try {
-      const response = await fetch('/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming you store the JWT token in localStorage
+const UserProfileForm = () => {
+    const [mounted, setMounted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [formData, setFormData] = useState({
+      fullName: '',
+      address1: '',
+      address2: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      skills: [] as string[],
+      preferences: '',
+      availability: [] as string[],
+    });
+  
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+  
+    if (!mounted) {
+      return null;
+    }
+  
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsLoading(true);
+      setError('');
+  
+      try {
+        const res = await fetch('/api/users/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          throw new Error(data.message || 'Profile update failed');
         }
-      });
-      
-      if (!response.ok) throw new Error('Failed to fetch profile');
-      
-      const userData = await response.json();
-      setFormData({
-        fullName: userData.profile.fullName,
-        address1: userData.profile.address1,
-        address2: userData.profile.address2 || '',
-        city: userData.profile.city,
-        state: userData.profile.state,
-        zipCode: userData.profile.zipCode,
-        skills: userData.profile.skills,
-        preferences: userData.profile.preferences || '',
-        availability: userData.profile.availability.map((date: Date) => 
-          new Date(date).toISOString().split('T')[0]
-        ),
-      });
-    } catch (err) {
-      setError('Failed to load profile data');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccessMessage('');
-
-    try {
-      const res = await fetch('/api/profile/update', {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || 'Update failed');
+  
+        // Display success message or redirect
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Profile update failed. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
-      
-      setSuccessMessage('Profile updated successfully!');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDateSelect = (date: string) => {
-    if (!formData.availability.includes(date)) {
+    };
+  
+    const handleDateSelect = (date: string) => {
+      if (!formData.availability.includes(date)) {
+        setFormData({
+          ...formData,
+          availability: [...formData.availability, date].sort(),
+        });
+      }
+    };
+  
+    const removeDate = (dateToRemove: string) => {
       setFormData({
         ...formData,
-        availability: [...formData.availability, date].sort(),
+        availability: formData.availability.filter((date) => date !== dateToRemove),
       });
-    }
-  };
-
-  const removeDate = (dateToRemove: string) => {
-    setFormData({
-      ...formData,
-      availability: formData.availability.filter(date => date !== dateToRemove),
-    });
-  };
-
-  if (!mounted) {
-    return null;
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold text-gray-900">Profile Management</h2>
-
-      {/* Personal Information */}
-      <div className="space-y-4">
+    };
+  
+    return (
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
+        <h2 className="text-2xl font-bold text-gray-900">Update Profile</h2>
+  
+        <div className="space-y-4">
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
             Full Name * (max 50 characters)
@@ -305,23 +316,20 @@ const ProfileManagement = () => {
         </div>
       )}
 
-      {successMessage && (
-        <div className="text-green-600 text-sm">
-          {successMessage}
+    
+  
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Saving Profile...' : 'Saved Profile'}
+          </button>
         </div>
-      )}
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Saving Changes...' : 'Save Changes'}
-        </button>
-      </div>
-    </form>
-  );
-};
-
-export default ProfileManagement;
+      </form>
+    );
+  };
+  
+  export default UserProfileForm;
+  

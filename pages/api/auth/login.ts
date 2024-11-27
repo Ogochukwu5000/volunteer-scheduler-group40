@@ -3,6 +3,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import client from "../../../lib/mongodb";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { IUser } from "@/lib/models/users.model";
+import { IUserProfile } from "@/lib/models/userProfile.model";
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,7 +23,7 @@ export default async function handler(
     }
 
     const db = client.db("your-db-name");
-    
+
     // Find user by email
     const user = await db.collection("users").findOne({ email });
 
@@ -36,6 +38,9 @@ export default async function handler(
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Fetch the user's profile information
+    const userProfile = await db.collection("userProfiles").findOne({ _id: user._id });
+
     // Generate JWT token
     const token = jwt.sign(
       { 
@@ -47,15 +52,16 @@ export default async function handler(
       { expiresIn: "24h" }
     );
 
-    // Return success with token
+    // Return success with token and user information
     res.status(200).json({ 
       message: "Login successful",
       token,
       user: {
         email: user.email,
         role: user.role,
-        fullName: user.profile.fullName
-      }
+        fullName: userProfile?.fullName || ""
+      },
+      redirectUrl: "/profile"
     });
 
   } catch (error) {

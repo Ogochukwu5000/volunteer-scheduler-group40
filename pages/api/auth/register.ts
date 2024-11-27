@@ -1,8 +1,8 @@
-// pages/api/auth/register.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import client from "../../../lib/mongodb";
 import bcrypt from "bcryptjs";
 import { IUser } from "@/lib/models/users.model";
+import { IUserProfile } from "@/lib/models/userProfile.model";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,37 +13,15 @@ export default async function handler(
   }
 
   try {
-    const {
-      email,
-      password,
-      fullName,
-      address1,
-      address2,
-      city,
-      state,
-      zipCode,
-      skills,
-      preferences,
-      availability,
-    } = req.body;
+    const { email, password } = req.body;
 
     // Validate required fields
-    if (!email || !password || !fullName || !address1 || !city || !state || !zipCode || !skills || !availability) {
+    if (!email || !password) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Validate field lengths
-    if (fullName.length > 50 || address1.length > 100 || (address2 && address2.length > 100) || city.length > 100) {
-      return res.status(400).json({ message: "One or more fields exceed maximum length" });
-    }
-
-    // Validate zip code
-    if (zipCode.length < 5 || zipCode.length > 9) {
-      return res.status(400).json({ message: "Invalid zip code format" });
-    }
-
     const db = client.db("your-db-name");
-    
+
     // Check if user already exists
     const existingUser = await db.collection("users").findOne({ email });
     if (existingUser) {
@@ -53,28 +31,35 @@ export default async function handler(
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user with profile
-    const user: IUser = {
+    // Create new user document
+    const newUser: IUser = {
       email,
       password: hashedPassword,
       role: "user",
-      profile: {
-        fullName,
-        address1,
-        address2,
-        city,
-        state,
-        zipCode,
-        skills,
-        preferences,
-        availability: availability.map((date: string) => new Date(date)),
-      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    await db.collection("users").insertOne(user);
-    
+    const userResult = await db.collection("users").insertOne(newUser);
+
+    // Create new user profile document
+    const newUserProfile: IUserProfile = {
+      _id: userResult.insertedId,
+      fullName: "",
+      address1: "",
+      address2: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      skills: [],
+      preferences: "",
+      availability: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await db.collection("userProfiles").insertOne(newUserProfile);
+
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error(error);

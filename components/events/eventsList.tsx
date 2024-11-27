@@ -1,7 +1,9 @@
+// components/EventsList.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { IEvent } from '@/lib/models/event.model';
+import { IUserProfile } from '@/lib/models/userProfile.model';
 
 const EventsList = () => {
   const [events, setEvents] = useState<IEvent[]>([]);
@@ -49,8 +51,9 @@ const EventsList = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Location
+                City
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volunteers</th>
             </tr>
@@ -60,7 +63,8 @@ const EventsList = () => {
               <React.Fragment key={event._id?.toString()}>
                 <tr>
                   <td className="px-6 py-4">{event.name}</td>
-                  <td className="px-6 py-4">{event.location}</td>
+                  <td className="px-6 py-4">{event.city}</td>
+                  <td className="px-6 py-4">{event.state}</td>
                   <td className="px-6 py-4">{new Date(event.eventDate).toLocaleDateString()}</td>
                   <td className="px-6 py-4">
                     <button
@@ -73,13 +77,12 @@ const EventsList = () => {
                 </tr>
                 {expandedEvent === event._id?.toString() && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 bg-gray-100">
+                    <td colSpan={5} className="px-6 py-4 bg-gray-100">
                       {event.volunteers && event.volunteers.length > 0 ? (
                         <ul className="list-disc pl-4">
-                          {event.volunteers.map((volunteerId) => (
-                            <li key={volunteerId.fullName} className="text-sm text-gray-800">
-                              Volunteer ID: {volunteerId.fullName}
-                              {/* Replace this with volunteer names if you have their data */}
+                          {event.volunteers.map((volunteer) => (
+                            <li key={volunteer.fullName} className="text-sm text-gray-800">
+                              Volunteer: {volunteer.fullName}
                             </li>
                           ))}
                         </ul>

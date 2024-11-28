@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import PDFDocument from 'pdfkit';
 import { createObjectCsvWriter } from 'csv-writer';
 import fs from 'fs';
-import { fetchData } from './dataAccess';
+import { fetchData } from '../lib/dataAccess';
 
 // Define interfaces for data structures
 interface Volunteer {

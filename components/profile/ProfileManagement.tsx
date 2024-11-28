@@ -61,11 +61,13 @@ const EditProfilePage = () => {
         body: JSON.stringify(profile)
       });
 
-      if (!res.ok) throw new Error('Failed to update profile');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update profile');
       
-      router.push('/profile');
+      localStorage.setItem('userProfile', JSON.stringify(data.profile));
+      router.push('/profilePage?updated=true');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      setError(err instanceof Error ? err.message : 'Failed to update profile2');
       setIsLoading(false);
     }
   };

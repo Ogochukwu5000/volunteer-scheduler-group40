@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import client from "../../../lib/mongodb";
 import jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
 
 interface JwtPayload {
   _id: string;
@@ -13,7 +14,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        // Get token from Authorization header
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ message: "No token provided" });
@@ -21,11 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-        const userId = decoded._id;
+        const userId = decoded.userId;
 
-        const updates = req.body;
+        // Remove _id from updates if it exists
+        const { _id, ...updates } = req.body;
         
-        const db = client.db();
+        const db = client.db("your-db-name");
         const result = await db.collection("userProfiles").updateOne(
             { userId: userId },
             { 

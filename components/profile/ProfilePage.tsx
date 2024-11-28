@@ -25,6 +25,8 @@ const UserProfilePage = () => {
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isGeneratingCsv, setIsGeneratingCsv] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -93,6 +95,42 @@ const UserProfilePage = () => {
 
     fetchUserData();
   }, [user?._id]);
+  // For PDF
+const handleDownloadPDF = async () => {
+    try {
+        const response = await fetch('/api/reports/generatePdf');
+        if (!response.ok) throw new Error('Failed to generate PDF');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'volunteer-report.pdf';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading PDF:', error);
+    }
+};
+
+// For CSV
+const handleDownloadCSV = async () => {
+    try {
+        const response = await fetch('/api/reports/generateCsv');
+        if (!response.ok) throw new Error('Failed to generate CSV');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'volunteer-reports.zip';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading CSV:', error);
+    }
+};
+
 
   if (isLoading) {
     return (
@@ -181,16 +219,34 @@ const UserProfilePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ProfileField label="Email" value={user?.email || ''} />
           <ProfileField label="Full Name" value={userProfile.fullName} />
-          <ProfileField 
-            label="Address" 
+          <ProfileField
+            label="Address"
             value={`${userProfile.address1}${userProfile.address2 ? `, ${userProfile.address2}` : ''}, ${userProfile.city}, ${userProfile.state} ${userProfile.zipCode}`}
           />
           <ProfileField label="Skills" value={userProfile.skills || []} />
           <ProfileField label="Preferences" value={userProfile.preferences || ''} />
-          <ProfileField 
-            label="Availability" 
+          <ProfileField
+            label="Availability"
             value={userProfile.availability?.map(date => new Date(date).toLocaleDateString()) || []}
           />
+        </div>
+
+        {/* Buttons to generate PDF and CSV */}
+        <div className="mt-6 flex space-x-4">
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPdf}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {isGeneratingPdf ? 'Generating PDF...' : 'Generate PDF'}
+          </button>
+          <button
+            onClick={handleDownloadCSV}
+            disabled={isGeneratingCsv}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400"
+          >
+            {isGeneratingCsv ? 'Generating CSV...' : 'Generate CSV'}
+          </button>
         </div>
       </div>
 

@@ -41,13 +41,12 @@ const LoginForm = () => {
         throw new Error(data.message || 'Login failed');
       }
       
+      // Save token to localStorage
+      localStorage.setItem('token', data.token);
+      
       // On successful login
       alert('Login successful');
       router.push(data.redirectUrl);
-      // You might want to:
-      // - Set authentication tokens/cookies
-      // - Update global auth state
-      // - Redirect to dashboard/home
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
@@ -55,7 +54,6 @@ const LoginForm = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold text-gray-900">Login</h2>

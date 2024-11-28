@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import '@testing-library/jest-dom/extend-expect';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import EventForm from '../components/events/EventForm';
+=======
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
+import EventForm from './EventForm';
+>>>>>>> d18a511abbaed977b501d86fb32f98e1d0acdd6f
 
 test('renders Event Description textarea', () => {
   const mockSetFormData = jest.fn();
